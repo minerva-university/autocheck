@@ -1,13 +1,8 @@
-import datetime
-
-
 TRACKING = False
 TRACKING_URL = 'http://127.0.0.1:5000'
 
 
 class NotebookStateTracker:
-
-    post_url_pattern = TRACKING_URL + '/hologram/%(id)s'
 
     def __init__(self):
 
@@ -27,10 +22,30 @@ class NotebookStateTracker:
             self.inputs = []
             self.outputs = {}
             self.request_session = FuturesSession()
-            self.request_futures = [
-                self.request_session.post(
-                    self.post_url_pattern % {'id': self.kernel_id},
-                    json={'timestamp': datetime.datetime.utcnow().isoformat()})]
+            self.request_futures = []
+
+            self.post_url = f'{TRACKING_URL}/hologram/{self.kernel_id}'
+            self.track_platform()
+
+    def init_json_payload(self):
+        import datetime
+        return {
+            'id': self.kernel_id,
+            'timestamp': datetime.datetime.utcnow().isoformat()}
+
+    def track_platform(self):
+        import platform
+        payload = self.init_json_payload()
+        payload['platform'] = {}
+        for name in dir(platform):
+            try:
+                result = getattr(platform, name)()
+            except:
+                pass
+            else:
+                payload['platform'][name] = str(result)
+        self.request_futures.append(
+            self.request_session.post(self.post_url, json=payload))
 
     def process_old_futures(self):
         if not self.tracking: return
@@ -55,11 +70,11 @@ class NotebookStateTracker:
             key: ipython_outputs[key]
             for key in set(ipython_outputs.keys()) - set(self.outputs.keys())}
         self.outputs.update(new_output_cells)
+        payload = self.init_json_payload()
+        payload['inputs'] = new_input_cells
+        payload['outputs'] = new_output_cells
         self.request_futures.append(
-            self.request_session.post(
-                self.post_url_pattern % {'id': self.kernel_id},
-                json={'inputs': new_input_cells, 'outputs': new_output_cells,
-                      'timestamp': datetime.datetime.utcnow().isoformat()}))
+            self.request_session.post(self.post_url, json=payload))
 
 
 notebook_state_tracker = NotebookStateTracker()
