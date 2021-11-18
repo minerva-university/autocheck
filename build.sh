@@ -1,1 +1,1 @@
-python -m build --sdist --outdir dist
+python -m build --wheel --outdir dist
