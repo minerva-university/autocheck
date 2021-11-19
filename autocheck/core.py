@@ -71,10 +71,11 @@ def process_exception():
 def check_function(func, answer, name=None, **kwargs):
     try:
         result = func(answer)
-        assert 'passed' in result
-        assert 'expected' in result
     except:
         result = process_exception()
+    else:
+        assert 'passed' in result
+        assert 'expected' in result
     result['answer'] = answer
     if name is None:
         result['name'] = func.__name__
@@ -87,7 +88,7 @@ def check_symbolic(expected, answer, name, **kwargs):
     # Compare two symbolic SymPy expressions and check that they are equal.
     from sympy import simplify
     try:
-        result = {'passed': simplify(answer - expected) == 0}
+        result = {'passed': bool(simplify(answer - expected) == 0)}
     except:
         result = process_exception()
     result['answer'] = answer
@@ -99,7 +100,7 @@ def check_symbolic(expected, answer, name, **kwargs):
 def check_absolute_numeric(expected, answer, name, tolerance=0, **kwargs):
     # Numeric absolute error check: abs(answer - expected) <= tolerance.
     try:
-        result = {'passed': abs(answer - expected) <= tolerance}
+        result = {'passed': bool(abs(answer - expected) <= tolerance)}
     except:
         result = process_exception()
     result['answer'] = answer
@@ -111,7 +112,7 @@ def check_absolute_numeric(expected, answer, name, tolerance=0, **kwargs):
 def check_relative_numeric(expected, answer, name, tolerance=1e-6, **kwargs):
     # Numeric relative error check: abs(answer/expected - 1) <= tolerance.
     try:
-        result = {'passed': abs(answer/expected - 1) <= tolerance}
+        result = {'passed': bool(abs(answer/expected - 1) <= tolerance)}
     except:
         result = process_exception()
     result['answer'] = answer
