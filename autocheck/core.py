@@ -3,7 +3,9 @@ from .notebook_state_tracker import notebook_state_tracker
 
 
 def display_failure(result):
-    print('⚠️ I could not check the answer because there was an error.')
+    print('⚠️ I could not check the answer because there was an error.\nI got this input\n')
+    print(result['answer'])
+    print()
     if result['answer'] in [..., None]:
         print("HINT: It looks like you didn't enter an answer.")
     elif type(result['answer']).__name__ in ['Xor', 'Not']:
@@ -18,7 +20,7 @@ def display_incorrect(result, show_answer):
     if not result['unique']:
         print('😕 It looks like you tried that answer before. Please try again.')
     else:
-        print('❌ This answer is incorrect. \nI got this\n')
+        print('❌ This answer is incorrect. \nI got this input\n')
         print(result['answer'])
         if show_answer:
             print('\nbut was expecting this\n')
