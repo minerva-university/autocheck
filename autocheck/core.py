@@ -30,22 +30,30 @@ def display_incorrect(result, show_answer):
             print('\nbut was expecting something else. Please try again.')
 
 
+def _do_callback(callback, result):
+    # Put a safety net around callbacks, print exception errors and return.
+    try:
+        callback(result)
+    except:
+        print(process_exception()['error'])
+
+
 def process_result(
     result, show_answer=False, callback_failure=None, callback_correct=None,
     callback_incorrect=None
 ):
     # Push new IPython inputs and outputs to the tracker
     notebook_state_tracker.process_new_cells()
-    # Check the response
+    # Handle the outcome of the response check
     if 'error' in result:
         print(result['error'])
         display_failure(result)
         if callback_failure:
-            callback_failure(result)
+            _do_callback(callback_failure, result)
     elif result['passed']:
         display_correct(result)
         if callback_correct:
-            callback_correct(result)
+            _do_callback(callback_correct, result)
     else:
         # Check that this response is not the same as earlier ones
         unique_attempts = check_cache.setdefault(result['name'], [])
@@ -57,7 +65,9 @@ def process_result(
         show_answer = show_answer and len(unique_attempts) > 1
         display_incorrect(result, show_answer)
         if callback_incorrect:
-            callback_incorrect(result)
+            _do_callback(callback_incorrect, result)
+    # Push outcome of the response check to the tracker
+    notebook_state_tracker.process_check_result(result)
 
 
 def process_exception():

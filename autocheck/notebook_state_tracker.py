@@ -34,6 +34,9 @@ class NotebookStateTracker:
             'timestamp': datetime.datetime.utcnow().isoformat()}
 
     def track_platform(self):
+        if not self.tracking: return
+        self.process_old_futures()
+
         import platform
         payload = self.init_json_payload()
         payload['platform'] = {}
@@ -49,6 +52,7 @@ class NotebookStateTracker:
 
     def process_old_futures(self):
         if not self.tracking: return
+
         failed_requests = [f for f in self.request_futures if f.result().status_code != 200]
         self.request_futures = []
         if len(failed_requests) > 0:
@@ -62,6 +66,7 @@ class NotebookStateTracker:
         '''
         if not self.tracking: return
         self.process_old_futures()
+
         ipython_inputs = get_ipython().user_ns.get('_ih', [])
         ipython_outputs = get_ipython().user_ns.get('_oh', {})
         new_input_cells = ipython_inputs[len(self.inputs):]
@@ -73,6 +78,15 @@ class NotebookStateTracker:
         payload = self.init_json_payload()
         payload['inputs'] = new_input_cells
         payload['outputs'] = new_output_cells
+        self.request_futures.append(
+            self.request_session.post(self.post_url, json=payload))
+
+    def process_check_result(self, result):
+        if not self.tracking: return
+        self.process_old_futures()
+
+        payload = self.init_json_payload()
+        payload['check_result'] = result
         self.request_futures.append(
             self.request_session.post(self.post_url, json=payload))
 
