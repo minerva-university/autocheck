@@ -1,3 +1,7 @@
-from .check import Check
+from .core import (
+    check_function,
+    check_symbolic,
+    check_absolute_numeric,
+    check_relative_numeric)
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
