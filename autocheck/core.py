@@ -39,11 +39,18 @@ def _do_callback(callback, result):
 
 
 def process_result(
-    result, show_answer=False, callback_failure=None, callback_correct=None,
-    callback_incorrect=None
+    result,
+    show_answer=False,
+    name=None, course=None, lp=None, workbook=None,
+    callback_failure=None, callback_correct=None, callback_incorrect=None
 ):
     # Push new IPython inputs and outputs to the tracker
     notebook_state_tracker.process_new_cells()
+    # Record problem identifier
+    result['name'] = name
+    result['course'] = course
+    result['lp'] = lp
+    result['workbook'] = workbook
     # Handle the outcome of the response check
     if 'error' in result:
         print(result['error'])
@@ -80,23 +87,19 @@ def process_exception():
         'error': traceback.format_exc(limit=0).strip().split('\n')[-1]}
 
 
-def check_function(func, answer, name=None, **kwargs):
+def check_function(function, answer, **kwargs):
     try:
-        result = func(answer)
+        result = function(answer)
     except:
         result = process_exception()
     else:
         assert 'passed' in result
         assert 'expected' in result
     result['answer'] = answer
-    if name is None:
-        result['name'] = func.__name__
-    else:
-        result['name'] = name
     process_result(result, **kwargs)
 
 
-def check_symbolic(expected, answer, name, **kwargs):
+def check_symbolic(expected, answer, **kwargs):
     # Compare two symbolic SymPy expressions and check that they are equal.
     from sympy import simplify
     try:
@@ -105,11 +108,10 @@ def check_symbolic(expected, answer, name, **kwargs):
         result = process_exception()
     result['answer'] = answer
     result['expected'] = expected
-    result['name'] = name
     process_result(result, **kwargs)
 
 
-def check_absolute_numeric(expected, answer, name, tolerance=0, **kwargs):
+def check_absolute_numeric(expected, answer, tolerance=0, **kwargs):
     # Numeric absolute error check: abs(answer - expected) <= tolerance.
     try:
         result = {'passed': bool(abs(answer - expected) <= tolerance)}
@@ -117,11 +119,10 @@ def check_absolute_numeric(expected, answer, name, tolerance=0, **kwargs):
         result = process_exception()
     result['answer'] = answer
     result['expected'] = expected
-    result['name'] = name
     process_result(result, **kwargs)
 
 
-def check_relative_numeric(expected, answer, name, tolerance=1e-6, **kwargs):
+def check_relative_numeric(expected, answer, tolerance=1e-6, **kwargs):
     # Numeric relative error check: abs(answer/expected - 1) <= tolerance.
     try:
         result = {'passed': bool(abs(answer/expected - 1) <= tolerance)}
@@ -129,5 +130,4 @@ def check_relative_numeric(expected, answer, name, tolerance=1e-6, **kwargs):
         result = process_exception()
     result['answer'] = answer
     result['expected'] = expected
-    result['name'] = name
     process_result(result, **kwargs)
