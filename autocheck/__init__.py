@@ -4,4 +4,4 @@ from .core import (
     check_absolute_numeric,
     check_relative_numeric)
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
