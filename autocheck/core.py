@@ -7,9 +7,9 @@ def display_failure(result):
     print(result['answer'])
     print()
     if result['answer'] in [..., None]:
-        print("HINT: It looks like you didn't enter an answer.")
+        print("⚠️ HINT: It looks like you didn't enter an answer.")
     elif type(result['answer']).__name__ in ['Xor', 'Not']:
-        print("HINT: It looks like you need to use ** to raise to a power (and not ^).")
+        print("⚠️ HINT: It looks like you need to use ** to raise to a power (and not ^).")
 
 
 def display_correct(result):

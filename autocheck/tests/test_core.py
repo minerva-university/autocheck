@@ -39,7 +39,7 @@ class Tests(unittest.TestCase):
                     patched_out.getvalue(),
                     '⚠️ I could not check the answer because there was an error.\n'
                     f'I got this input\n\n{answer}\n\n'
-                    "HINT: It looks like you didn't enter an answer.\n")
+                    "⚠️ HINT: It looks like you didn't enter an answer.\n")
 
     def test_sympy_xor_output(self):
         '''SymPy xor (n^2) prompts a hint that you should use power (n**2) instead'''
@@ -56,7 +56,7 @@ class Tests(unittest.TestCase):
                 patched_out.getvalue(),
                 '⚠️ I could not check the answer because there was an error.\n'
                 f'I got this input\n\n{answer}\n\n'
-                "HINT: It looks like you need to use ** to raise to a power (and not ^).\n")
+                "⚠️ HINT: It looks like you need to use ** to raise to a power (and not ^).\n")
 
     def test_check_function(self):
         '''Check a user response with a custom function'''
