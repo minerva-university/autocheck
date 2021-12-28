@@ -7,6 +7,7 @@ from ..core import (
     display_failure, display_correct, display_incorrect,
     process_result,
     check_function, check_symbolic, check_absolute_numeric, check_relative_numeric,
+    track,
 )
 from .. import notebook_state_tracker
 
@@ -133,3 +134,24 @@ class Tests(unittest.TestCase):
                     {
                         'name': 'test_problem', 'course': 'cs114', 'lp': 1, 'workbook': 'pcw',
                         'passed': True, 'answer': 10, 'expected': 10})
+
+
+    def test_track_vars(self):
+        '''Provide tracking variables in a track call'''
+        class RecordResult:
+            def __call__(self, result):
+                self.result = result
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            with patch(
+                __name__ + '.notebook_state_tracker.notebook_state_tracker.process_check_result',
+                new=RecordResult()
+            ) as patched_call:
+                track(
+                    vars = {'test': 'vars', 0: 1},
+                    name = 'test_problem',
+                    course = 'cs114', lp = 1, workbook = 'pcw')
+                self.assertEqual(
+                    patched_call.result,
+                    {
+                        'name': 'test_problem', 'course': 'cs114', 'lp': 1, 'workbook': 'pcw',
+                        'track_vars': {'test': 'vars', 0: 1}})

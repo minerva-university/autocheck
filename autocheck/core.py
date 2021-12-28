@@ -38,6 +38,19 @@ def _do_callback(callback, result):
         print(process_exception()['error'])
 
 
+def track(vars=None, name=None, course=None, lp=None, workbook=None):
+    # Push new IPython inputs and outputs to the tracker
+    notebook_state_tracker.process_new_cells()
+    result = {
+        'name': name,
+        'course': course,
+        'lp': lp,
+        'workbook': workbook,
+        'track_vars': vars}
+    # Push outcome of the response check to the tracker
+    notebook_state_tracker.process_check_result(result)
+
+
 def process_result(
     result,
     show_answer=False,
