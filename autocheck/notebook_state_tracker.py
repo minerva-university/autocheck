@@ -1,5 +1,22 @@
-TRACKING = False
-TRACKING_URL = 'http://127.0.0.1:5000'
+import json
+
+
+TRACKING = True
+TRACKING_URL = 'https://minerva-autocheck-1.herokuapp.com'
+
+
+class CustomJsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if obj is Ellipsis:
+            return '...'
+        else:
+            try:
+                return super().default(self, obj)
+            except:
+                try:
+                    return str(obj)
+                except:
+                    return 'JSON_ENCODER_FAILURE'
 
 
 class NotebookStateTracker:
@@ -33,6 +50,13 @@ class NotebookStateTracker:
             'id': self.kernel_id,
             'timestamp': datetime.datetime.utcnow().isoformat()}
 
+    def post(self, payload):
+        self.request_futures.append(
+            self.request_session.post(
+                self.post_url,
+                data=json.dumps(payload, cls=CustomJsonEncoder),
+                headers={'Content-Type': 'application/json'}))
+
     def track_platform(self):
         if not self.tracking: return
         self.process_old_futures()
@@ -47,8 +71,7 @@ class NotebookStateTracker:
                 pass
             else:
                 payload['platform'][name] = str(result)
-        self.request_futures.append(
-            self.request_session.post(self.post_url, json=payload))
+        self.post(payload)
 
     def process_old_futures(self):
         if not self.tracking: return
@@ -78,8 +101,7 @@ class NotebookStateTracker:
         payload = self.init_json_payload()
         payload['inputs'] = new_input_cells
         payload['outputs'] = new_output_cells
-        self.request_futures.append(
-            self.request_session.post(self.post_url, json=payload))
+        self.post(payload)
 
     def process_check_result(self, result):
         if not self.tracking: return
@@ -87,8 +109,7 @@ class NotebookStateTracker:
 
         payload = self.init_json_payload()
         payload['check_result'] = result
-        self.request_futures.append(
-            self.request_session.post(self.post_url, json=payload))
+        self.post(payload)
 
 
 notebook_state_tracker = NotebookStateTracker()
