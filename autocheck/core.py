@@ -82,7 +82,7 @@ def process_result(
             unique_attempts.append(result['answer'])
         else:
             result['unique'] = False
-        show_answer = show_answer and len(unique_attempts) > 1
+        show_answer = show_answer and len(unique_attempts) > 2
         display_incorrect(result, show_answer)
         if callback_incorrect:
             _do_callback(callback_incorrect, result)
