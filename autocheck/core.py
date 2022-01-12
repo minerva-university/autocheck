@@ -17,17 +17,19 @@ def display_correct(result):
 
 
 def display_incorrect(result, show_answer):
-    if not result['unique']:
-        print('😕 It looks like you tried that answer before. Please try again.')
+    if result['unique']:
+        message = '❌ This answer is incorrect.'
     else:
-        print('❌ This answer is incorrect. \nI got this input\n')
-        print(result['answer'])
-        if show_answer:
-            print('\nbut was expecting this\n')
-            print(result['expected'])
-            print('\nPlease try again.')
-        else:
-            print('\nbut was expecting something else. Please try again.')
+        message = '😕 It looks like you tried that answer before.'
+    print(message)
+    print('I got this input\n')
+    print(result['answer'])
+    if show_answer:
+        print('\nbut was expecting this\n')
+        print(result['expected'])
+        print('\nPlease try again.')
+    else:
+        print('\nbut was expecting something else. Please try again.')
 
 
 def _do_callback(callback, result):

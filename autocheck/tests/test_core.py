@@ -16,7 +16,7 @@ class Tests(unittest.TestCase):
 
     def setUp(self):
         self.correct_output = '✅ Success!\n'
-        self.incorrect_output = '❌ This answer is incorrect. \nI got this input\n\n{answer}\n\nbut was expecting something else. Please try again.\n'
+        self.incorrect_output = '❌ This answer is incorrect.\nI got this input\n\n{answer}\n\nbut was expecting something else. Please try again.\n'
 
     def test_callback_with_exception(self):
         '''Callback functions that raise exceptions are handled gracefully'''
