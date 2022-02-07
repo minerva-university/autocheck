@@ -155,3 +155,17 @@ class Tests(unittest.TestCase):
                     {
                         'name': 'test_problem', 'course': 'cs114', 'lp': 1, 'workbook': 'pcw',
                         'track_vars': {'test': 'vars', 0: 1}})
+
+    def test_simplify_floats(self):
+        '''Simplify mixtures of rational numbers and floats correctly'''
+        import sympy
+        from sympy.abc import n
+        expected = sympy.Rational(2, 3) ** n  # rational numbers
+        answer = (2 / 3) ** n  # floating point numbers
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_symbolic(expected, answer)
+            self.assertEqual(patched_out.getvalue(), self.correct_output)
+        answer = (0.6667) ** n
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_symbolic(expected, answer)
+            self.assertEqual(patched_out.getvalue(), self.incorrect_output.format(answer=answer))
