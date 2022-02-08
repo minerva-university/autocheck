@@ -169,3 +169,13 @@ class Tests(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as patched_out:
             check_symbolic(expected, answer)
             self.assertEqual(patched_out.getvalue(), self.incorrect_output.format(answer=answer))
+
+    def test_simplify_sqrts(self):
+        '''Simplify square roots of powers of symbols by assuming the symbols are positive'''
+        from sympy.abc import n
+        from sympy import pi, sqrt
+        expected = sqrt(2/pi/n)
+        answer = 1/sqrt(pi*n/2)
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_symbolic(expected, answer)
+            self.assertEqual(patched_out.getvalue(), self.correct_output)

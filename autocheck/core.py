@@ -116,9 +116,9 @@ def check_function(function, answer, **kwargs):
 
 def check_symbolic(expected, answer, **kwargs):
     # Compare two symbolic SymPy expressions and check that they are equal.
-    from sympy import simplify
+    from sympy import simplify, powdenest
     try:
-        result = {'passed': bool(simplify(answer - expected, rational=True, inverse=True) == 0)}
+        result = {'passed': bool(simplify(powdenest(answer - expected, force=True), rational=True, inverse=True) == 0)}
     except:
         result = process_exception()
     result['answer'] = answer
