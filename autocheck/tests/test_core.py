@@ -179,3 +179,30 @@ class Tests(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as patched_out:
             check_symbolic(expected, answer)
             self.assertEqual(patched_out.getvalue(), self.correct_output)
+
+    def test_cache_unhashable_type(self):
+        '''Cache past results that are not hashable'''
+
+        def check_answer(answer):
+            import numpy as np
+            expected = [1.0, 2.0, 3.0]
+            return {
+                'passed': max(abs(np.array(answer) - np.array(expected))) < 1e-6,
+                'expected': expected}
+
+        import numpy as np
+        # First attempt
+        answer = np.array([1.1, 2.2, 3.3])
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_function(check_answer, answer, name='test_cache_unhashable_type')
+            self.assertEqual(patched_out.getvalue(), self.incorrect_output.format(answer=answer))
+        # Second attempt
+        answer = np.array([1.2, 2.3, 3.4])
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_function(check_answer, answer, name='test_cache_unhashable_type')
+            self.assertEqual(patched_out.getvalue(), self.incorrect_output.format(answer=answer))
+        # Third attempt
+        answer = np.array([1.0, 2.0, 3.0])
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_function(check_answer, answer, name='test_cache_unhashable_type')
+            self.assertEqual(patched_out.getvalue(), self.correct_output)

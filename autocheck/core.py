@@ -79,9 +79,10 @@ def process_result(
     else:
         # Check that this response is not the same as earlier ones
         unique_attempts = check_cache.setdefault(result['name'], [])
-        if result['answer'] not in unique_attempts:
+        cache_result = str(result['answer'])
+        if cache_result not in unique_attempts:
             result['unique'] = True
-            unique_attempts.append(result['answer'])
+            unique_attempts.append(cache_result)
         else:
             result['unique'] = False
         show_answer = show_answer and len(unique_attempts) > 2
