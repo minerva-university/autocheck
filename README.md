@@ -62,6 +62,7 @@ To develop, test, or build this package, install the development environment.
 ```bash
 virtualenv venv
 source venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements_dev.txt
 ```
 

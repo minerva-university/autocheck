@@ -3,3 +3,4 @@ sympy==1.6.2
 numpy==1.22.2
 coverage
 build
+-e .
