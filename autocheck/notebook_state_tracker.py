@@ -1,6 +1,5 @@
 import json
 
-
 '''
 Globals for controlling whether tracking is active and where information is
 sent. These variables are set here rather than in an environment since the
@@ -10,11 +9,21 @@ importing the library using
 
 import autocheck
 autocheck.notebook_state_tracker.notebook_state_tracker.tracking = False
+
+Unfortunately, these variables have to be stored in the library and not in the
+environment since we cannot configure Forum Workbooks.
 '''
 TRACKING = True
 TRACKING_URL = 'https://minerva-autocheck-1.herokuapp.com'
 
 
+'''
+Augment the standard JSON encoder to handle the Python Ellipsis type (which is
+often used as a placeholder for student inputs) and to convert any type that
+cannot be handled to the string 'JSON_ENCODER_FAILURE'. This is to prevent the
+encoder from raising an exception that breaks the autocheck call from a Forum
+Workbook, resulting in a nasty error message that the student would not expect.
+'''
 class CustomJsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if obj is Ellipsis:
@@ -30,6 +39,11 @@ class CustomJsonEncoder(json.JSONEncoder):
 
 
 class NotebookStateTracker:
+    '''
+    Store notebook state (input and output cells) and periodically send them
+    to the tracking server. All HTTP calls are asynchronous so as not to delay
+    providing feedback to the student.
+    '''
 
     def __init__(self):
 
@@ -37,6 +51,8 @@ class NotebookStateTracker:
             get_ipython()
         except:
             # We're not in an IPython shell or Jupyter notebook; don't track.
+            # This is useful for local testing since we don't want tests to be
+            # stored in the tracking database.
             self.tracking = False
         else:
             self.tracking = TRACKING
@@ -68,6 +84,12 @@ class NotebookStateTracker:
                 headers={'Content-Type': 'application/json'}))
 
     def track_platform(self):
+        '''
+        Record the platform (operating system, Python kernel, etc.) on which the
+        IPython interpreter is running. This is mostly for diagnostic purposes
+        and to allow us to distinguish between Forum Workbooks and Jupyter
+        notebooks on Google Colab (or other web platforms).
+        '''
         if not self.tracking: return
         self.process_old_futures()
 
@@ -84,6 +106,10 @@ class NotebookStateTracker:
         self.post(payload)
 
     def process_old_futures(self):
+        '''
+        Check all previous async HTTP calls and if any of them failed, try to
+        send them again.
+        '''
         if not self.tracking: return
 
         failed_requests = [
@@ -96,8 +122,9 @@ class NotebookStateTracker:
 
     def process_new_cells(self):
         '''
-        Find cells that are not yet in `self.inputs` and `self.outputs`, return
-        them and add them to inputs and outputs.
+        Find workbook cells that are not in `self.inputs` and `self.outputs`,
+        send them to the tracking server, and add them to `self.inputs` and
+        `self.outputs`.
         '''
         if not self.tracking: return
         self.process_old_futures()
@@ -116,6 +143,9 @@ class NotebookStateTracker:
         self.post(payload)
 
     def process_check_result(self, result):
+        '''
+        Send the results of checking a student input to the tracking server.
+        '''
         if not self.tracking: return
         self.process_old_futures()
 

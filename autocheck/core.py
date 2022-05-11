@@ -1,8 +1,17 @@
+'''
+Core functions for checking student answers and providing feedback.
+'''
+
 from .cache import check_cache
 from .notebook_state_tracker import notebook_state_tracker
 
 
 def display_failure(result):
+    '''
+    Print a failure message to the standard output based on the type of error
+    in `result`. This typically happens when an exception was raised.  Hints are
+    provided if the student input was empty or contains a common error.
+    '''
     print(
         '⚠️ I could not check the answer because there was an error.\n'
         'I got this input\n')
@@ -17,10 +26,18 @@ def display_failure(result):
 
 
 def display_correct(result):
+    '''
+    Print a success message to the standard output.
+    '''
     print('✅ Success!')
 
 
 def display_incorrect(result, show_answer):
+    '''
+    Print a failure message to the standard output if the student input was
+    incorrect. Optionally, it displays the correct answer if `show_answer` is
+    `True`.
+    '''
     if result['unique']:
         message = '❌ This answer is incorrect.'
     else:
@@ -37,7 +54,10 @@ def display_incorrect(result, show_answer):
 
 
 def _do_callback(callback, result):
-    # Put a safety net around callbacks, print exception errors and return.
+    '''
+    Put a safety net around user-provided callback functions, print exception
+    error messages (if any) and return without interrupting execution.
+    '''
     try:
         callback(result)
     except:
@@ -45,7 +65,15 @@ def _do_callback(callback, result):
 
 
 def track(vars=None, name=None, course=None, lp=None, workbook=None):
-    # Push new IPython inputs and outputs to the tracker
+    '''
+    Push new IPython inputs and outputs to the tracker but don't take any other
+    action. No student inputs are checked.
+
+    This call will do nothing if `name` and `course` are not specified. The
+    `lp` and `workbook` variables are optional.
+    '''
+    if (name is None) or (course is None):
+        return
     notebook_state_tracker.process_new_cells()
     result = {
         'name': name,
@@ -64,6 +92,18 @@ def process_result(
     callback_failure=None, callback_correct=None, callback_incorrect=None,
     enable_tracking=True,
 ):
+    '''
+    Generic function for processing student input _after_ it has be checked and
+    marked as correct or incorrect. Never call this function directly. Use one
+    of the check_* functions instead.
+
+    Processing the marked input sends a message to the tracking (if enabled)
+    server and prints a success/failure message to standard output.
+
+    Even if tracking is enabled, this call will not send information to the
+    tracking server unless `name` and `course` are specified.
+    '''
+
     # Allow tracking only if the course and question name are specified
     enable_tracking &= (name is not None) and (course is not None)
     # Push new IPython inputs and outputs to the tracker
@@ -113,6 +153,16 @@ def process_exception():
 
 
 def check_function(function, answer, **kwargs):
+    '''
+    Check a student input by calling a user-defined function. The function is
+    expected to return a dictionary with at least the fields 'passed' and
+    'expected'. The 'passed' field is of type bool, indicating whether the
+    student input is correct. The 'expected' field is of any type and contains
+    the correct (expected) answer to the question.
+
+    Any additional fields present in the dictionary return by `function` will
+    also be sent to the tracking server.
+    '''
     try:
         result = function(answer)
     except:
@@ -125,7 +175,9 @@ def check_function(function, answer, **kwargs):
 
 
 def check_symbolic(expected, answer, **kwargs):
-    # Compare two symbolic SymPy expressions and check that they are equal.
+    '''
+    Compare two symbolic SymPy expressions and check that they are equal.
+    '''
     from sympy import simplify, powdenest
     try:
         result = {
@@ -143,7 +195,10 @@ def check_symbolic(expected, answer, **kwargs):
 
 
 def check_absolute_numeric(expected, answer, tolerance=0, **kwargs):
-    # Numeric absolute error check: abs(answer - expected) <= tolerance.
+    '''
+    Numeric absolute error check: abs(answer - expected) <= tolerance. The
+    default tolerance is 0 which means the values have to match precisely.
+    '''
     try:
         result = {'passed': bool(abs(answer - expected) <= tolerance)}
     except:
@@ -154,7 +209,9 @@ def check_absolute_numeric(expected, answer, tolerance=0, **kwargs):
 
 
 def check_relative_numeric(expected, answer, tolerance=1e-6, **kwargs):
-    # Numeric relative error check: abs(answer/expected - 1) <= tolerance.
+    '''
+    Numeric relative error check: abs(answer/expected - 1) <= tolerance.
+    '''
     try:
         result = {'passed': bool(abs(answer/expected - 1) <= tolerance)}
     except:
