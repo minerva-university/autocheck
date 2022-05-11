@@ -3,13 +3,17 @@ from .notebook_state_tracker import notebook_state_tracker
 
 
 def display_failure(result):
-    print('⚠️ I could not check the answer because there was an error.\nI got this input\n')
+    print(
+        '⚠️ I could not check the answer because there was an error.\n'
+        'I got this input\n')
     print(result['answer'])
     print()
     if result['answer'] in [..., None]:
         print("⚠️ HINT: It looks like you didn't enter an answer.")
     elif type(result['answer']).__name__ in ['Xor', 'Not']:
-        print("⚠️ HINT: It looks like you need to use ** to raise to a power (and not ^).")
+        print(
+            "⚠️ HINT: It looks like you need to use ** to raise to a power"
+            " (and not ^).")
 
 
 def display_correct(result):
@@ -57,10 +61,14 @@ def process_result(
     result,
     show_answer=False,
     name=None, course=None, lp=None, workbook=None,
-    callback_failure=None, callback_correct=None, callback_incorrect=None
+    callback_failure=None, callback_correct=None, callback_incorrect=None,
+    enable_tracking=True,
 ):
+    # Allow tracking only if the course and question name are specified
+    enable_tracking &= (name is not None) and (course is not None)
     # Push new IPython inputs and outputs to the tracker
-    notebook_state_tracker.process_new_cells()
+    if enable_tracking:
+        notebook_state_tracker.process_new_cells()
     # Record problem identifier
     result['name'] = name
     result['course'] = course
@@ -90,7 +98,8 @@ def process_result(
         if callback_incorrect:
             _do_callback(callback_incorrect, result)
     # Push outcome of the response check to the tracker
-    notebook_state_tracker.process_check_result(result)
+    if enable_tracking:
+        notebook_state_tracker.process_check_result(result)
 
 
 def process_exception():
@@ -119,7 +128,13 @@ def check_symbolic(expected, answer, **kwargs):
     # Compare two symbolic SymPy expressions and check that they are equal.
     from sympy import simplify, powdenest
     try:
-        result = {'passed': bool(simplify(powdenest(answer - expected, force=True), rational=True, inverse=True) == 0)}
+        result = {
+        'passed': bool(
+            simplify(
+                powdenest(
+                    answer - expected,
+                    force=True),
+                rational=True, inverse=True) == 0)}
     except:
         result = process_exception()
     result['answer'] = answer

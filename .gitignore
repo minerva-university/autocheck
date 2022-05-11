@@ -1,3 +1,6 @@
 __pycache__/
 autocheck.egg-info/
 dist/
+build/
+venv/
+.coverage

@@ -1,0 +1,4 @@
+requests-futures==1.0.0
+sympy==1.6.2
+numpy==1.22.2
+coverage

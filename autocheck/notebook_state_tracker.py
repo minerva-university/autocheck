@@ -1,6 +1,16 @@
 import json
 
 
+'''
+Globals for controlling whether tracking is active and where information is
+sent. These variables are set here rather than in an environment since the
+library typically doesn't get used in an easily configurable environment.
+However, you can disable tracking (or change the server URL) right after
+importing the library using
+
+import autocheck
+autocheck.notebook_state_tracker.notebook_state_tracker.tracking = False
+'''
 TRACKING = True
 TRACKING_URL = 'https://minerva-autocheck-1.herokuapp.com'
 
@@ -76,7 +86,9 @@ class NotebookStateTracker:
     def process_old_futures(self):
         if not self.tracking: return
 
-        failed_requests = [f for f in self.request_futures if f.result().status_code != 200]
+        failed_requests = [
+            f for f in self.request_futures
+            if f.result().status_code != 200]
         self.request_futures = []
         if len(failed_requests) > 0:
             # TODO: Resend
