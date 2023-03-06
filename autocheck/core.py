@@ -186,12 +186,19 @@ def check_symbolic(expected, answer, **kwargs):
     from sympy import simplify, powdenest
     try:
         result = {
-        'passed': bool(
-            simplify(
-                powdenest(
-                    answer - expected,
-                    force=True),
-                rational=True, inverse=True) == 0)}
+        'passed': (
+            bool(
+                simplify(
+                    powdenest(
+                        answer - expected,
+                        force=True),
+                    rational=True, inverse=True) == 0)
+            or bool(
+                simplify(
+                    powdenest(
+                        answer / expected,
+                        force=True),
+                    rational=True, inverse=True) == 1))}
     except:
         result = process_exception()
     result['answer'] = answer

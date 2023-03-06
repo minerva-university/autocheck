@@ -206,3 +206,13 @@ class Tests(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as patched_out:
             check_function(check_answer, answer, name='test_cache_unhashable_type')
             self.assertEqual(patched_out.getvalue(), self.correct_output)
+
+    def test_ratio_simplify(self):
+        '''Test the new ratio = 1 check for equality.'''
+        from sympy import factorial
+        from sympy.abc import a, b, c, d, x, y, z
+        expected = factorial(x+y+z)/factorial(x)/factorial(y)/factorial(z) * (a+b)**x * c**y * d**z / (a+b+c+d)**(x+y+z)
+        answer = factorial(x+y+z)/factorial(x)/factorial(y)/factorial(z) * ((a+b)/(a+b+c+d))**x * (c/(a+b+c+d))**y * (d/(a+b+c+d))**z
+        with patch('sys.stdout', new=StringIO()) as patched_out:
+            check_symbolic(expected, answer)
+            self.assertEqual(patched_out.getvalue(), self.correct_output)
