@@ -102,6 +102,11 @@ def process_result(
 
     Even if tracking is enabled, this call will not send information to the
     tracking server unless `name` and `course` are specified.
+
+    The user can provide callback functions for `correct` when the answer is
+    correct, `incorrect` when the answer was incorrect, and `failure` for when
+    an exception occurred. The `result` dictionary which contains the user
+    and expected answers provided is passed as the only argument.
     '''
 
     # Allow tracking only if the course and question name are specified
