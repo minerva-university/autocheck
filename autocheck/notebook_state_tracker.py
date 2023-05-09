@@ -13,8 +13,8 @@ autocheck.notebook_state_tracker.notebook_state_tracker.tracking = False
 Unfortunately, these variables have to be stored in the library and not in the
 environment since we cannot configure Forum Workbooks.
 '''
-TRACKING = True
-TRACKING_URL = 'https://minerva-autocheck-1.herokuapp.com'
+TRACKING = False
+TRACKING_URL = ''
 
 
 '''
