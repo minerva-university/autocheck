@@ -5,4 +5,4 @@ from .core import (
     check_relative_numeric,
     track)
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
